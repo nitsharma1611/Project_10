@@ -13,6 +13,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 public abstract class BaseDAOImpl<T extends BaseDTO> implements BaseDAOInt<T> {
+
 	@PersistenceContext
 	protected EntityManager entityManager;
 
@@ -123,4 +124,23 @@ public abstract class BaseDAOImpl<T extends BaseDTO> implements BaseDAOInt<T> {
 		return search(dto, 0, 0, userContext);
 	}
 
+	protected boolean isEmptyString(String val) {
+		return val == null || val.trim().length() == 0;
+	}
+
+	protected boolean isZeroNumber(Double val) {
+		return val == null || val == 0;
+	}
+
+	protected boolean isZeroNumber(Long val) {
+		return val == null || val == 0;
+	}
+
+	protected boolean isZeroNumber(Integer val) {
+		return val == null || val == 0;
+	}
+
+	protected boolean isNotNull(Object val) {
+		return val != null;
+	}
 }
