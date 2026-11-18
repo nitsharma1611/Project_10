@@ -72,29 +72,29 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 
 		try {
 			T dto = (T) form.getDto();
-			T existDto = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), userContext);
-			if (dto.getId() != null && dto.getId() > 0) {
 
-				if (existDto != null && dto.getId() != existDto.getId()) {
+			if (dto.getId() != null && dto.getId() > 0) {
+				T existDto1 = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), userContext);
+				if (existDto1 != null && dto.getId() != existDto1.getId()) {
 					res.setSuccess(false);
 					res.addMessage(dto.getLabel() + " already exist");
 					return res;
 				}
 				baseService.update(dto, userContext);
 				res.addData(dto.getId());
-				res.setSuccess(true);
 				res.addMessage(dto.getTableName() + " updated successfully..!!");
 			} else {
-				if (existDto != null) {
-					res.setSuccess(false);
-					res.addMessage(dto.getLabel() + " already exist");
-					return res;
+				if (dto.getUniqueKey() != null && !dto.getUniqueKey().equals("")) {
+					T existDto = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), userContext);
+					if (existDto != null) {
+						res.setSuccess(false);
+						res.addMessage(dto.getLabel() + " already exist");
+						return res;
+					}
 				}
-
 				baseService.add(dto, userContext);
-				res.setSuccess(true);
 				res.addMessage(dto.getTableName() + " added successfully..!!");
-			}	
+			}
 		} catch (Exception e) {
 			res.setSuccess(false);
 			res.addMessage(e.getMessage());
@@ -108,7 +108,6 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 		ORSResponse res = new ORSResponse(true);
 		T dto = baseService.findById(id, userContext);
 		if (dto != null) {
-			res.setSuccess(true);
 			res.addData(dto);
 		} else {
 			res.setSuccess(false);
@@ -126,7 +125,7 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 			for (String id : ids) {
 				baseService.delete(Long.parseLong(id), userContext);
 			}
-
+			
 			T dto = (T) form.getDto();
 
 			List<T> list = baseService.search(dto, Integer.parseInt(pageNo), pageSize, userContext);
