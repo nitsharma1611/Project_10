@@ -28,7 +28,9 @@ public class EmployeeDAOImpl extends BaseDAOImpl<EmployeeDTO> implements Employe
 
 	    if (!isEmptyString(dto.getName())) {
 	        whereCondition.add(
-	            builder.like(qRoot.get("name"), dto.getName() + "%")
+	        		 builder.like(
+	        	                builder.lower(qRoot.get("name")),
+	        	                "%" + dto.getName().toLowerCase() + "%")
 	        );
 	    }
 

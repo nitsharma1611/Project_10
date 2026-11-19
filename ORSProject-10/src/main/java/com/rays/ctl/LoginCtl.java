@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rays.common.BaseCtl;
 import com.rays.common.ORSResponse;
 import com.rays.common.UserContext;
+import com.rays.config.JWTUtil;
 import com.rays.dto.UserDTO;
 import com.rays.form.ForgetPasswordForm;
 import com.rays.form.LoginForm;
@@ -24,7 +26,9 @@ import com.rays.service.UserServiceInt;
 @RestController
 @RequestMapping(value = "Auth")
 public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
-
+	
+	@Autowired
+	private JWTUtil jwtUtil;
 	@PostMapping("login")
 	public ORSResponse login(@RequestBody @Valid LoginForm form, BindingResult bindingResult, HttpSession session,
 			HttpServletRequest request) throws Exception {
@@ -42,7 +46,7 @@ public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 			res.addMessage("Invalid Login ID & Password");
 		} else {
 			UserContext context = new UserContext(dto);
-
+			String token = jwtUtil.generateToken(dto.getId(), dto.getLoginId(), dto.getRoleName());
 			session.setAttribute("userContext", context);
 
 			res.setSuccess(true);
@@ -51,6 +55,7 @@ public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 			res.addResult("role", dto.getRoleName());
 			res.addResult("fname", dto.getFirstName());
 			res.addResult("lname", dto.getLastName());
+			res.addResult("token", token);
 			return res;
 		}
 		return res;
