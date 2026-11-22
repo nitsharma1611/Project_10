@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -143,4 +144,11 @@ public abstract class BaseDAOImpl<T extends BaseDTO> implements BaseDAOInt<T> {
 	protected boolean isNotNull(Object val) {
 		return val != null;
 	}
+	 public List<?> marksheetMeritList(String hql, UserContext userContext) {
+	        Query q = entityManager.createQuery(hql);
+	        q.setFirstResult(0);
+	        q.setMaxResults(10);
+	        return q.getResultList();
+	    }
+
 }
