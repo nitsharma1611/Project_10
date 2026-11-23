@@ -1,6 +1,5 @@
 package com.rays.ctl;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -26,28 +25,33 @@ import com.rays.service.UserServiceInt;
 @RestController
 @RequestMapping(value = "Auth")
 public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
-	
+
 	@Autowired
 	private JWTUtil jwtUtil;
+	
+	@Autowired
+	UserServiceInt userService;
+
+
 	@PostMapping("login")
-	public ORSResponse login(@RequestBody @Valid LoginForm form, BindingResult bindingResult, HttpSession session,
-			HttpServletRequest request) throws Exception {
+	public ORSResponse login(@RequestBody @Valid LoginForm form, BindingResult bindingResult) throws Exception {
 
 		ORSResponse res = validate(bindingResult);
 
 		if (!res.isSuccess()) {
 			return res;
 		}
-
+ 
 		UserDTO dto = baseService.authenticate(form.getLoginId(), form.getPassword());
 
 		if (dto == null) {
 			res.setSuccess(false);
 			res.addMessage("Invalid Login ID & Password");
 		} else {
+
 			UserContext context = new UserContext(dto);
+
 			String token = jwtUtil.generateToken(dto.getId(), dto.getLoginId(), dto.getRoleName());
-			session.setAttribute("userContext", context);
 
 			res.setSuccess(true);
 			res.addData(dto);
@@ -108,27 +112,23 @@ public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 
 		return res;
 	}
-
 	@PostMapping("forgetPassword")
-	public ORSResponse forgetPassword(@RequestBody @Valid ForgetPasswordForm form, BindingResult bindingResult) {
+	public ORSResponse forgetPassword(@RequestBody @Valid ForgetPasswordForm form, BindingResult bindingResult) {ORSResponse res = validate(bindingResult);
 
-		ORSResponse res = validate(bindingResult);
-
-		if (!res.isSuccess()) {
-			return res;
-		}
-
-		UserDTO fDto = baseService.forgotPassword(form.getLoginId());
-
-		if (fDto == null) {
-			res.setSuccess(false);
-			res.addMessage("LoginId / Email not found.");
-			return res;
-		} else {
-			res.setSuccess(true);
-			res.addMessage("Hello " + fDto.getFirstName() + " " + fDto.getLastName()
-					+ "..! Your password has been sent on your email.");
-		}
+	if (!res.isSuccess()) {
 		return res;
 	}
+
+	boolean flag = userService.forgotPassword(form.getLoginId());
+
+	if (flag == true) {
+		res.setSuccess(true);
+		res.addMessage("Password sent to your email");
+	} else {
+		res.setSuccess(false);
+		res.addMessage("Login Id not found");
+	}
+
+	return res;
+}
 }

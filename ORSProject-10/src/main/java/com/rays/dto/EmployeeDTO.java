@@ -2,6 +2,7 @@ package com.rays.dto;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -10,10 +11,13 @@ import com.rays.common.BaseDTO;
 @Entity
 @Table(name = "st_employee")
 public class EmployeeDTO extends BaseDTO {
-
+	@Column(name = "name", length = 50)
 	private String name;
+	@Column(name = "department", length = 50)
 	private String department;
+	@Column(name = "salary")
 	private Double salary;
+	@Column(name = "joiningDate")
 	private Date joiningDate;
 
 	public String getName() {
