@@ -20,13 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.rays.common.BaseCtl;
 import com.rays.common.DropdownList;
 import com.rays.common.ORSResponse;
-
+import com.rays.dto.AttachmentDTO;
 import com.rays.dto.RoleDTO;
 import com.rays.dto.UserDTO;
 import com.rays.form.ChangePasswordForm;
 import com.rays.form.MyProfileForm;
 import com.rays.form.UserForm;
-
+import com.rays.service.AttachmentServiceInt;
 import com.rays.service.RoleServiceInt;
 import com.rays.service.UserServiceInt;
 
@@ -36,10 +36,9 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 
 	@Autowired
 	RoleServiceInt roleService = null;
-
-	/*
-	 * @Autowired private AttachmentServiceInt attachmentService;
-	 */
+	
+	@Autowired
+	private AttachmentServiceInt attachmentService;
 	@GetMapping("preload")
 	public ORSResponse preload() {
 		ORSResponse res = new ORSResponse(true);
@@ -67,7 +66,7 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 		dto.setGender(form.getGender());
 
 		baseService.update(dto, userContext);
-
+		
 		res.setSuccess(true);
 		res.addMessage("Your Profile updated successfully..!!");
 
@@ -97,66 +96,79 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 
 		return res;
 	}
-	/*
-	 * @PostMapping(value = "/profilePic/{userId}", consumes =
-	 * "multipart/form-data") public ORSResponse uploadPic(@PathVariable Long
-	 * userId,
-	 * 
-	 * @RequestParam("file") MultipartFile file) {
-	 * 
-	 * if (file == null || file.isEmpty()) { throw new
-	 * RuntimeException("File is empty!"); }
-	 * 
-	 * System.out.println("File Name: " + file.getOriginalFilename());
-	 * System.out.println("File Size: " + file.getSize());
-	 * 
-	 * 
-	 * AttachmentDTO attachmentDto = new AttachmentDTO(file);
-	 * 
-	 * attachmentDto.setDescription("profile pic"); attachmentDto.setUserId(userId);
-	 * 
-	 * UserDTO userDto = baseService.findById(userId, null);
-	 * 
-	 * if (userDto.getImageId() != null && userDto.getImageId() > 0) {
-	 * attachmentDto.setId(userDto.getImageId()); }
-	 * 
-	 * Long imageId = attachmentService.save(attachmentDto, userContext);
-	 * 
-	 * if (userDto.getImageId() == null) { userDto.setImageId(imageId);
-	 * baseService.update(userDto, userContext); }
-	 * 
-	 * ORSResponse res = new ORSResponse(); res.addResult("imageId", imageId);
-	 * 
-	 * return res; }
-	 * 
-	 * /** Downloads the profile picture of a user.
+	
+	@PostMapping(value = "/profilePic/{userId}", consumes = "multipart/form-data")
+	public ORSResponse uploadPic(@PathVariable Long userId,
+			@RequestParam("file") MultipartFile file) {
+
+		if (file == null || file.isEmpty()) {
+			throw new RuntimeException("File is empty!");
+		}
+
+		System.out.println("File Name: " + file.getOriginalFilename());
+		System.out.println("File Size: " + file.getSize());
+
+		AttachmentDTO attachmentDto = new AttachmentDTO(file);
+
+		attachmentDto.setDescription("profile pic");
+		attachmentDto.setUserId(userId);
+
+		UserDTO userDto = baseService.findById(userId, null);
+
+		if (userDto.getImageId() != null && userDto.getImageId() > 0) {
+			attachmentDto.setId(userDto.getImageId());
+		}
+
+		Long imageId = attachmentService.save(attachmentDto, userContext);
+
+		if (userDto.getImageId() == null) {
+			userDto.setImageId(imageId);
+			baseService.update(userDto, userContext);
+		}
+
+		ORSResponse res = new ORSResponse();
+		res.addResult("imageId", imageId);
+
+		return res;
+	}
+
+	/**
+	 * Downloads the profile picture of a user.
 	 *
-	 * @param userId ID of the user
-	 * 
+	 * @param userId   ID of the user
 	 * @param response HTTP response used to send image data
-	 * 
-	 * @GetMapping("/profilePic/{userId}") public void downloadPic(@PathVariable
-	 * Long userId, HttpServletResponse response) {
-	 * 
-	 * try {
-	 * 
-	 * UserDTO userDto = baseService.findById(userId, null);
-	 * 
-	 * if (userDto == null || userDto.getImageId() == null) {
-	 * response.getWriter().write("No image found"); return; }
-	 * 
-	 * AttachmentDTO attachmentDTO =
-	 * attachmentService.findById(userDto.getImageId(), userContext);
-	 * 
-	 * if (attachmentDTO != null && attachmentDTO.getDoc() != null) {
-	 * 
-	 * response.setContentType(attachmentDTO.getType());
-	 * 
-	 * OutputStream out = response.getOutputStream();
-	 * out.write(attachmentDTO.getDoc()); out.close();
-	 * 
-	 * } else { response.getWriter().write("File not found"); }
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); } }
 	 */
+	@GetMapping("/profilePic/{userId}")
+	public void downloadPic(@PathVariable Long userId,
+			HttpServletResponse response) {
+
+		try {
+
+			UserDTO userDto = baseService.findById(userId, null);
+
+			if (userDto == null || userDto.getImageId() == null) {
+				response.getWriter().write("No image found");
+				return;
+			}
+
+			AttachmentDTO attachmentDTO =
+					attachmentService.findById(userDto.getImageId(), userContext);
+
+			if (attachmentDTO != null && attachmentDTO.getDoc() != null) {
+
+				response.setContentType(attachmentDTO.getType());
+
+				OutputStream out = response.getOutputStream();
+				out.write(attachmentDTO.getDoc());
+				out.close();
+
+			} else {
+				response.getWriter().write("File not found");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 }
