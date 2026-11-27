@@ -3,6 +3,7 @@ package com.rays.ctl;
 import java.io.OutputStream;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -20,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.rays.common.BaseCtl;
 import com.rays.common.DropdownList;
 import com.rays.common.ORSResponse;
+import com.rays.common.UserContext;
+import com.rays.common.UserContextHolder;
 import com.rays.dto.AttachmentDTO;
 import com.rays.dto.RoleDTO;
 import com.rays.dto.UserDTO;
@@ -50,47 +53,33 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 	}
 
 	@PostMapping("myProfile")
-	public ORSResponse myProfile(
-	        @RequestBody @Valid MyProfileForm form,
-	        BindingResult bindingResult) {
+	public ORSResponse myProfile(@RequestBody @Valid MyProfileForm form, BindingResult bindingResult
+	     ) {
 
+		
 	    ORSResponse res = validate(bindingResult);
 
-	    if (!res.isSuccess()) {
-	        return res;
-	    }
+		if (!res.isSuccess()) {
+			return res;
+		}
+	    
+		Long userId = userContext.getUserId();
+		
+		UserDTO dto = baseService.findById(userContext.getUserId(), userContext);
+		dto.setFirstName(form.getFirstName());
+		dto.setLastName(form.getLastName());
+		dto.setDob(form.getDob());
+		dto.setPhone(form.getPhone());
+		dto.setGender(form.getGender());
 
-	    Long userId = userContext.getUserId();
+		baseService.update(dto, userContext);
+		
+		res.setSuccess(true);
+		res.addMessage("Your Profile updated successfully..!!");
 
-	    System.out.println("Logged-in User ID: " + userId);
-
-	    if (userId == null) {
-	        res.setSuccess(false);
-	        res.addMessage("User is not authenticated. Please login again.");
-	        return res;
-	    }
-
-	    UserDTO dto = baseService.findById(userId, userContext);
-
-	    if (dto == null) {
-	        res.setSuccess(false);
-	        res.addMessage("User not found");
-	        return res;
-	    }
-
-	    dto.setFirstName(form.getFirstName());
-	    dto.setLastName(form.getLastName());
-	    dto.setDob(form.getDob());
-	    dto.setPhone(form.getPhone());
-	    dto.setGender(form.getGender());
-
-	    baseService.update(dto, userContext);
-
-	    res.setSuccess(true);
-	    res.addMessage("Your Profile updated successfully..!!");
-
-	    return res;
+		return res;
 	}
+
 	@PostMapping("changePassword")
 	public ORSResponse changePassword(@RequestBody @Valid ChangePasswordForm form, BindingResult bindingResult) {
 

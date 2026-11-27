@@ -51,6 +51,16 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 					throw new Exception("Invalid JWT token");
 				}
 
+				 Long userId = jwtUtil.extractUserId(jwtToken);
+
+               System.out.println("userId by token"+userId);
+                 
+                 if (userId == null || userId <= 0) {
+                     throw new Exception("Invalid User ID");
+                 }
+                 
+                 
+                 
 				if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
 					UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(loginId);
@@ -60,18 +70,19 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
 					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
+					
+					
 					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 				}
 
 				UserDTO dto = new UserDTO();
 				dto.setLoginId(loginId);
-
+				dto.setId(userId);
 				System.out.println("request filter: " + dto.getLoginId());
 
 				UserContext context = new UserContext(dto);
-
-				// ThreadLocal me set
 				UserContextHolder.setContext(context);
+				
 
 			} catch (Exception e) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

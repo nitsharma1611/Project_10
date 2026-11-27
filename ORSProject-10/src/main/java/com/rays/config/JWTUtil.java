@@ -41,8 +41,8 @@ public class JWTUtil {
 		payload.put("sub", loginId); // loginId as subject
 		payload.put("userId", userId); // numeric user id
 		payload.put("role", role); // user role
-		payload.put("iat", nowMillis); // issued at
-		payload.put("exp", expMillis); // expiration
+		payload.put("iat", nowMillis/1000); // issued at
+		payload.put("exp", expMillis/1000); // expiration
 
 		String headerBase64 = encodeUrl(objectMapper.writeValueAsString(header));
 		String payloadBase64 = encodeUrl(objectMapper.writeValueAsString(payload));

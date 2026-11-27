@@ -16,6 +16,7 @@ public class UserContext {
 	}
 
 	public UserContext(UserDTO dto) {
+	    
 		this.userDTO = dto;
 		this.userId = dto.getId();
 		this.loginId = dto.getLoginId();
