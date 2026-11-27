@@ -68,12 +68,12 @@ public class LibraryDTO extends BaseDTO {
 	@Override
 	public String getLabel() {
 		// TODO Auto-generated method stub
-		return null;
+		return "Book";
 	}
 	@Override
 	public String getTableName() {
 		// TODO Auto-generated method stub
-		return "Book";
+		return "Booked";
 	}
 	
 	

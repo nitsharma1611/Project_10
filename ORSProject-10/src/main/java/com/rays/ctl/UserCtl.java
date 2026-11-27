@@ -50,29 +50,47 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 	}
 
 	@PostMapping("myProfile")
-	public ORSResponse myProfile(@RequestBody @Valid MyProfileForm form, BindingResult bindingResult) {
+	public ORSResponse myProfile(
+	        @RequestBody @Valid MyProfileForm form,
+	        BindingResult bindingResult) {
 
-		ORSResponse res = validate(bindingResult);
+	    ORSResponse res = validate(bindingResult);
 
-		if (!res.isSuccess()) {
-			return res;
-		}
+	    if (!res.isSuccess()) {
+	        return res;
+	    }
 
-		UserDTO dto = baseService.findById(userContext.getUserId(), userContext);
-		dto.setFirstName(form.getFirstName());
-		dto.setLastName(form.getLastName());
-		dto.setDob(form.getDob());
-		dto.setPhone(form.getPhone());
-		dto.setGender(form.getGender());
+	    Long userId = userContext.getUserId();
 
-		baseService.update(dto, userContext);
-		
-		res.setSuccess(true);
-		res.addMessage("Your Profile updated successfully..!!");
+	    System.out.println("Logged-in User ID: " + userId);
 
-		return res;
+	    if (userId == null) {
+	        res.setSuccess(false);
+	        res.addMessage("User is not authenticated. Please login again.");
+	        return res;
+	    }
+
+	    UserDTO dto = baseService.findById(userId, userContext);
+
+	    if (dto == null) {
+	        res.setSuccess(false);
+	        res.addMessage("User not found");
+	        return res;
+	    }
+
+	    dto.setFirstName(form.getFirstName());
+	    dto.setLastName(form.getLastName());
+	    dto.setDob(form.getDob());
+	    dto.setPhone(form.getPhone());
+	    dto.setGender(form.getGender());
+
+	    baseService.update(dto, userContext);
+
+	    res.setSuccess(true);
+	    res.addMessage("Your Profile updated successfully..!!");
+
+	    return res;
 	}
-
 	@PostMapping("changePassword")
 	public ORSResponse changePassword(@RequestBody @Valid ChangePasswordForm form, BindingResult bindingResult) {
 
