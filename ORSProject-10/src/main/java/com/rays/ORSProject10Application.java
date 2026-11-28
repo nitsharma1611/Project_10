@@ -10,9 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @SpringBootApplication
 public class ORSProject10Application {
 
-	/*
-	 * @Autowired private FrontCtl frontCtl;
-	 */
+	
 	public static void main(String[] args) {
 
 		SpringApplication.run(ORSProject10Application.class, args);
@@ -31,11 +29,8 @@ System.out.println("Started ORSProject10Application");
                         .allowCredentials(true);
 			}
 
-			/*
-			 * @Override public void addInterceptors(InterceptorRegistry registry) {
-			 * registry.addInterceptor(frontCtl).addPathPatterns("/**").excludePathPatterns(
-			 * "/Auth/**"); }
-			 */
+			
+			
 		};
 		return w;
 	}

@@ -66,39 +66,52 @@ public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 	}
 
 	@PostMapping("signUp")
-	public ORSResponse signUp(@RequestBody @Valid UserRegistrationForm form, BindingResult bindingResult) {
+	public ORSResponse signUp(
+	        @RequestBody @Valid UserRegistrationForm form,
+	        BindingResult bindingResult) {
 
-		ORSResponse res = validate(bindingResult);
+	    ORSResponse res = validate(bindingResult);
 
-		if (!res.isSuccess()) {
-			return res;
-		}
+	    if (!res.isSuccess()) {
+	        return res;
+	    }
 
-		UserDTO dto = baseService.findByLoginId(form.getLoginId(), userContext);
+	    // Create context for self registration
+	    UserContext registrationContext = new UserContext();
 
-		if (dto != null) {
-			res.setSuccess(false);
-			res.addMessage("Login Id already exists");
-			return res;
-		}
+	    registrationContext.setLoginId("Self Registration");
+	    registrationContext.setRoleName("Guest");
 
-		dto = new UserDTO();
-		dto.setFirstName(form.getFirstName());
-		dto.setLastName(form.getLastName());
-		dto.setLoginId(form.getLoginId());
-		dto.setPassword(form.getPassword());
-		dto.setDob(form.getDob());
-		dto.setGender(form.getGender());
-		dto.setPhone(form.getPhone());
+	    // Check duplicate Login ID
+	    UserDTO dto = baseService.findByLoginId(
+	            form.getLoginId(), registrationContext);
 
-		dto.setStatus("Inactive");
-		dto.setRoleId(2L);
+	    if (dto != null) {
+	        res.setSuccess(false);
+	        res.addMessage("Login Id already exists");
+	        return res;
+	    }
 
-		baseService.register(dto, userContext);
+	    dto = new UserDTO();
 
-		res.setSuccess(true);
-		res.addMessage("User has been registered successfully..!!");
-		return res;
+	    dto.setFirstName(form.getFirstName());
+	    dto.setLastName(form.getLastName());
+	    dto.setLoginId(form.getLoginId());
+	    dto.setPassword(form.getPassword());
+	    dto.setDob(form.getDob());
+	    dto.setGender(form.getGender());
+	    dto.setPhone(form.getPhone());
+
+	    dto.setStatus("Inactive");
+	    dto.setRoleId(2L);
+
+	    // Register user
+	    baseService.register(dto, registrationContext);
+
+	    res.setSuccess(true);
+	    res.addMessage("User has been registered successfully..!!");
+
+	    return res;
 	}
 
 	@GetMapping("logout")

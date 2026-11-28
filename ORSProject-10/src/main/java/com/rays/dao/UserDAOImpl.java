@@ -21,6 +21,8 @@ public class UserDAOImpl extends BaseDAOImpl<UserDTO> implements UserDAOInt {
 	@Autowired
 	RoleDAOInt roleDao;
 
+	@Autowired
+	AttachmentDAOInt attachmentDao;
 	@Override
 	public Class<UserDTO> getDTOClass() {
 		return UserDTO.class;
@@ -36,8 +38,12 @@ public class UserDAOImpl extends BaseDAOImpl<UserDTO> implements UserDAOInt {
 			UserDTO userData = findByPK(dto.getId(), userContext);
 			dto.setLastLogin(userData.getLastLogin());
 		}
+		if (dto.getId() != null && dto.getId() > 0) {
+			UserDTO userData = findByPK(dto.getId(), null);
+			dto.setImageId(userData.getImageId());
+		}
 	}
-
+	
 	@Override
 	protected List<Predicate> getWhereClause(UserDTO dto, CriteriaBuilder builder, Root<UserDTO> qRoot) {
 
